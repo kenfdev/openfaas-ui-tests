@@ -1,0 +1,7 @@
+lib/drivers/
+lib/selenium/
+log/
+reports/
+*.log
+screenshots/
+node_modules/
