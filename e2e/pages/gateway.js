@@ -1,4 +1,102 @@
+var gatewayCommands = {
+  clickDeployNewFunction: function() {
+    this.expect.section("@sidenav").to.be.visible.before(10000);
+    var sidenavSection = this.section.sidenav;
+    sidenavSection.expect.element("@newFunctionButton").to.be.visible;
+    sidenavSection.click("@newFunctionButton");
+    return this;
+  },
+  searchFunctionFromStore: function(funcName) {
+    var storeTabContent = this.section.deployDialog.section.storeTabContent;
+    storeTabContent.expect.element("@searchInput").to.be.visible;
+    this.api.pause(1000);
+    storeTabContent.setValue("@searchInput", funcName);
+    return this;
+  },
+  selectManualDeploymentTab: function() {
+    var deployDialog = this.section.deployDialog;
+    deployDialog.expect.element("@manualTab").to.be.visible;
+    deployDialog.click("@manualTab");
+    return this;
+  },
+  setFunctionNameManually: function(funcName) {
+    var manualTabContent = this.section.deployDialog.section.manualTabContent;
+    manualTabContent.clearValue("@funcNameInput");
+    manualTabContent.setValue("@funcNameInput", funcName);
+    return this;
+  },
+  deployFunction: function() {
+    this.section.deployDialog.click("@deployButton");
+    return this;
+  },
+  searchFunctionFromList: function(funcName) {
+    var sidenavSection = this.section.sidenav;
+    sidenavSection.expect.element("@searchInput").to.be.visible.before(10000);
+    sidenavSection.clearValue("@searchInput");
+    sidenavSection.setValue("@searchInput", funcName);
+    return this;
+  },
+  setInvokeRequest: function(reqText) {
+    var selectedFunctionSection = this.section.selectedFunction;
+    selectedFunctionSection.clearValue("@invocationRequestInput");
+    selectedFunctionSection.setValue("@invocationRequestInput", reqText);
+    return this;
+  },
+  invokeFunctionWhenReady: function() {
+    var selectedFunctionSection = this.section.selectedFunction;
+    selectedFunctionSection.expect
+      .element("@invokeButton")
+      .to.be.enabled.before(10000);
+
+    selectedFunctionSection.click("@invokeButton");
+    return this;
+  },
+  checkFunctionInvocationSuccessCode: function(code) {
+    var selectedFunctionSection = this.section.selectedFunction;
+    selectedFunctionSection.expect
+      .element("@invocationStatusInput")
+      .value.to.equal(code)
+      .before(5000);
+    return this;
+  },
+  waitForToastFadeInOut: function() {
+    this.expect.section("@toast").to.be.present.before(1000);
+    this.expect.section("@toast").not.to.be.present.before(5000);
+    return this;
+  },
+  deleteSelectedFunction: function() {
+    var selectedFunctionSection = this.section.selectedFunction;
+
+    selectedFunctionSection.expect.element("@deleteButton").to.be.visible;
+    selectedFunctionSection.click("@deleteButton");
+
+    this.expect.section("@deleteConfirmDialog").to.be.visible.before(5000);
+    var deleteConfirmSection = this.section.deleteConfirmDialog;
+    deleteConfirmSection.expect.element("@confirmButton").to.be.visible;
+    deleteConfirmSection.click("@confirmButton");
+    this.expect.section("@deleteConfirmDialog").not.to.be.present.before(1000);
+    return this;
+  },
+  waitForAllFunctionToDisappear: function() {
+    var sidenavSection = this.section.sidenav;
+    sidenavSection.expect
+      .element("@searchInput")
+      .not.to.be.visible.before(10000);
+    return this;
+  },
+  deployFunctionFromStore: function(storeName, deployName) {
+    this.clickDeployNewFunction().searchFunctionFromStore(storeName);
+    var storeTabContent = this.section.deployDialog.section.storeTabContent;
+    storeTabContent.click("@firstFunctionInList");
+
+    return this.selectManualDeploymentTab()
+      .setFunctionNameManually(deployName)
+      .deployFunction();
+  }
+};
+
 module.exports = {
+  commands: [gatewayCommands],
   url: "http://192.168.100.8:8080",
   sections: {
     toast: {
@@ -33,6 +131,9 @@ module.exports = {
         },
         invocationStatusInput: {
           selector: 'input[ng-model="invocationStatus"]'
+        },
+        invocationResponseBody: {
+          selector: 'textarea[ng-model="invocationResponse"]'
         }
       }
     },
