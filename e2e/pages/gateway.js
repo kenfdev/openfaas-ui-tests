@@ -1,57 +1,69 @@
 var gatewayCommands = {
-  clickDeployNewFunction: function() {
+  clickDeployNewFunction: function () {
     this.expect.section("@sidenav").to.be.visible.before(10000);
     var sidenavSection = this.section.sidenav;
     sidenavSection.expect.element("@newFunctionButton").to.be.visible;
     sidenavSection.click("@newFunctionButton");
     return this;
   },
-  searchFunctionFromStore: function(funcName) {
+  searchFunctionFromStore: function (funcName) {
     var storeTabContent = this.section.deployDialog.section.storeTabContent;
     storeTabContent.expect.element("@searchInput").to.be.visible;
     this.api.pause(1000);
     storeTabContent.setValue("@searchInput", funcName);
     return this;
   },
-  selectManualDeploymentTab: function() {
+  selectManualDeploymentTab: function () {
     var deployDialog = this.section.deployDialog;
     deployDialog.expect.element("@manualTab").to.be.visible;
     deployDialog.click("@manualTab");
     return this;
   },
-  setFunctionNameManually: function(funcName) {
+  setFunctionNameManually: function (funcName) {
     var manualTabContent = this.section.deployDialog.section.manualTabContent;
     manualTabContent.clearValue("@funcNameInput");
     manualTabContent.setValue("@funcNameInput", funcName);
     return this;
   },
-  deployFunction: function() {
+  deployFunction: function () {
     this.section.deployDialog.click("@deployButton");
     return this;
   },
-  searchFunctionFromList: function(funcName) {
+  searchFunctionFromList: function (funcName) {
     var sidenavSection = this.section.sidenav;
     sidenavSection.expect.element("@searchInput").to.be.visible.before(10000);
     sidenavSection.clearValue("@searchInput");
     sidenavSection.setValue("@searchInput", funcName);
     return this;
   },
-  setInvokeRequest: function(reqText) {
+  setInvokeRequest: function (reqText) {
     var selectedFunctionSection = this.section.selectedFunction;
     selectedFunctionSection.clearValue("@invocationRequestInput");
     selectedFunctionSection.setValue("@invocationRequestInput", reqText);
     return this;
   },
-  invokeFunctionWhenReady: function() {
+  invokeTextFunction: function () {
+    this.section.selectedFunction.click("@textRadio");
+    return this.invokeFunctionWhenReady();
+  },
+  invokeJSONFunction: function () {
+    this.section.selectedFunction.click("@jsonRadio");
+    return this.invokeFunctionWhenReady();
+  },
+  invokeDownloadFunction: function () {
+    this.section.selectedFunction.click("@downloadRadio");
+    return this.invokeFunctionWhenReady();
+  },
+  invokeFunctionWhenReady: function () {
     var selectedFunctionSection = this.section.selectedFunction;
     selectedFunctionSection.expect
       .element("@invokeButton")
-      .to.be.enabled.before(10000);
+      .to.be.enabled.before(120000);
 
     selectedFunctionSection.click("@invokeButton");
     return this;
   },
-  checkFunctionInvocationSuccessCode: function(code) {
+  checkFunctionInvocationSuccessCode: function (code) {
     var selectedFunctionSection = this.section.selectedFunction;
     selectedFunctionSection.expect
       .element("@invocationStatusInput")
@@ -59,12 +71,12 @@ var gatewayCommands = {
       .before(5000);
     return this;
   },
-  waitForToastFadeInOut: function() {
+  waitForToastFadeInOut: function () {
     this.expect.section("@toast").to.be.present.before(1000);
     this.expect.section("@toast").not.to.be.present.before(5000);
     return this;
   },
-  deleteSelectedFunction: function() {
+  deleteSelectedFunction: function () {
     var selectedFunctionSection = this.section.selectedFunction;
 
     selectedFunctionSection.expect.element("@deleteButton").to.be.visible;
@@ -77,14 +89,14 @@ var gatewayCommands = {
     this.expect.section("@deleteConfirmDialog").not.to.be.present.before(1000);
     return this;
   },
-  waitForAllFunctionToDisappear: function() {
+  waitForAllFunctionToDisappear: function () {
     var sidenavSection = this.section.sidenav;
     sidenavSection.expect
       .element("@searchInput")
       .not.to.be.visible.before(10000);
     return this;
   },
-  deployFunctionFromStore: function(storeName, deployName) {
+  deployFunctionFromStore: function (storeName, deployName) {
     this.clickDeployNewFunction().searchFunctionFromStore(storeName);
     var storeTabContent = this.section.deployDialog.section.storeTabContent;
     storeTabContent.click("@firstFunctionInList");
@@ -97,7 +109,7 @@ var gatewayCommands = {
 
 module.exports = {
   commands: [gatewayCommands],
-  url: "http://192.168.100.8:8080",
+  url: "http://localhost:8080",
   sections: {
     toast: {
       selector: "md-toast"
@@ -122,6 +134,15 @@ module.exports = {
       elements: {
         deleteButton: {
           selector: 'button[ng-click="deleteFunction()"]'
+        },
+        textRadio: {
+          selector: 'md-radio-button[aria-label="Text"]'
+        },
+        jsonRadio: {
+          selector: 'md-radio-button[aria-label="JSON"]'
+        },
+        downloadRadio: {
+          selector: 'md-radio-button[aria-label="Download"]'
         },
         invokeButton: {
           selector: 'button[ng-click="fireRequest()"]'
